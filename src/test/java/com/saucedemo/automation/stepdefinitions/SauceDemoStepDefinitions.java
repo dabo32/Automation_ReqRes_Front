@@ -26,6 +26,7 @@ public class SauceDemoStepDefinitions {
         OnStage.setTheStage(new OnlineCast());
     }
 
+
     @Given("the actor is on the login page")
     public void theActorIsOnTheLoginPage() {
         OnStage.theActorCalled("David"); //Main actor
@@ -34,6 +35,7 @@ public class SauceDemoStepDefinitions {
         );
     }
 
+    //Escenario: @SuccessfulLogin
     @When("the actor enters valid credentials")
     public void theActorEntersValidCredentials() {
         String user = EnvironmentSpecificConfiguration.from(environmentVariables)
@@ -53,6 +55,7 @@ public class SauceDemoStepDefinitions {
                 seeThat("the inventory title", TheInventoryTitle.value(), equalTo("Products"))
         );
     }
+    //---------
 
     @When("the actor attempts to login with incorrect credentials")
     public void theActorAttemptsToLoginWithIncorrectCredentials() {
