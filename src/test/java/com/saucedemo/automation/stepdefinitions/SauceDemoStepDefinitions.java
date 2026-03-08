@@ -26,7 +26,7 @@ public class SauceDemoStepDefinitions {
         OnStage.setTheStage(new OnlineCast());
     }
 
-
+    //Background: Inital configuration
     @Given("the actor is on the login page")
     public void theActorIsOnTheLoginPage() {
         OnStage.theActorCalled("David"); //Main actor
@@ -57,6 +57,7 @@ public class SauceDemoStepDefinitions {
     }
     //---------
 
+    //Escenario: @FailedLogin
     @When("the actor attempts to login with incorrect credentials")
     public void theActorAttemptsToLoginWithIncorrectCredentials() {
         // Task for failed login
@@ -66,7 +67,9 @@ public class SauceDemoStepDefinitions {
     public void theyShouldSeeAnInformativeErrorMessage() {
         // Question for error message
     }
+    //---------
 
+    //Escenario: @AddProduct
     @When("the actor adds the {string} to the cart")
     public void theActorAddsTheToTheCart(String productName) {
         // Task to add a specific product
@@ -76,7 +79,9 @@ public class SauceDemoStepDefinitions {
     public void theCartIconShouldDisplayAddedProduct(String count) {
         // Question for cart count
     }
+    //---------
 
+    //Escenario: @CompletePurchase
     @Given("the actor has added a product to the cart")
     public void theActorHasAddedAProductToTheCart() {
         // Pre-condition task
@@ -91,7 +96,9 @@ public class SauceDemoStepDefinitions {
     public void theyShouldSeeTheConfirmationMessage(String expectedMessage) {
         // Question for success message
     }
+    //---------
 
+    //Escenario: @MultipleProductsWorkflow
     @When("the actor adds the following products to the cart:")
     public void theActorAddsTheFollowingProductsToTheCart(List<String> products) {
         // Task using the Data Table list
@@ -111,4 +118,5 @@ public class SauceDemoStepDefinitions {
     public void theOrderShouldBeProcessedSuccessfully() {
         // Final validation
     }
+    //---------
 }
