@@ -1,16 +1,25 @@
-package com.saucedemo.automation.stepdefinition;
+package com.saucedemo.automation.stepdefinitions;
 
+import com.saucedemo.automation.questions.TheInventoryTitle;
+import com.saucedemo.automation.tasks.Login;
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
 import net.serenitybdd.screenplay.actions.Open;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
-import org.junit.Before;
+import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.List;
 
+import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static org.hamcrest.core.IsEqual.equalTo;
+
 public class SauceDemoStepDefinitions {
+
+    private EnvironmentVariables environmentVariables;
 
     @Before
     public void setTheStage() {
@@ -19,19 +28,30 @@ public class SauceDemoStepDefinitions {
 
     @Given("the actor is on the login page")
     public void theActorIsOnTheLoginPage() {
-        OnStage.theActorCalled("David").attemptsTo(
+        OnStage.theActorCalled("David"); //Main actor
+        OnStage.theActorInTheSpotlight().wasAbleTo(
                 Open.browserOn().thePageNamed("pages.saucedemo")
         );
     }
 
     @When("the actor enters valid credentials")
     public void theActorEntersValidCredentials() {
-        // Here we will call the Login Task
+        String user = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("credentials.standard.user");
+        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("credentials.standard.password");
+
+        OnStage.theActorInTheSpotlight().attemptsTo(
+                Login.withCredentials(user, password)
+        );
     }
 
     @Then("they should be redirected to the product catalog")
     public void theyShouldBeRedirectedToTheProductCatalog() {
-        // Here we will use a Question to verify the Inventory page
+        //Question to validate title 'Products'
+        OnStage.theActorInTheSpotlight().should(
+                seeThat("the inventory title", TheInventoryTitle.value(), equalTo("Products"))
+        );
     }
 
     @When("the actor attempts to login with incorrect credentials")

@@ -10,4 +10,6 @@ public class LoginPage {
             .located(By.id("password"));
     public static final Target LOGIN_BUTTON = Target.the("login button")
             .located(By.id("login-button"));
+    public static final Target ERROR_MESSAGE = Target.the("error message container")
+            .locatedBy("//h3[@data-test='error']");
 }
