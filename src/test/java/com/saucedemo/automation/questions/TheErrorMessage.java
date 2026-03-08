@@ -1,0 +1,17 @@
+package com.saucedemo.automation.questions;
+
+import com.saucedemo.automation.userinterfaces.LoginPage;
+import net.serenitybdd.screenplay.Actor;
+import net.serenitybdd.screenplay.Question;
+import net.serenitybdd.screenplay.questions.Text;
+
+public class TheErrorMessage implements Question<String> {
+    public static TheErrorMessage value() {
+        return new TheErrorMessage();
+    }
+
+    @Override
+    public String answeredBy(Actor actor) {
+        return Text.of(LoginPage.ERROR_MESSAGE).answeredBy(actor);
+    }
+}
