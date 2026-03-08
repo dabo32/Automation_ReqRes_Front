@@ -1,4 +1,4 @@
-package co.com.screenplay.project.stepdefinition;
+package com.saucedemo.automation.stepdefinition;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
