@@ -1,5 +1,6 @@
 package com.saucedemo.automation.stepdefinitions;
 
+import com.saucedemo.automation.questions.TheErrorMessage;
 import com.saucedemo.automation.questions.TheInventoryTitle;
 import com.saucedemo.automation.tasks.Login;
 import io.cucumber.java.Before;
@@ -15,6 +16,7 @@ import net.thucydides.model.util.EnvironmentVariables;
 import java.util.List;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 public class SauceDemoStepDefinitions {
@@ -60,12 +62,22 @@ public class SauceDemoStepDefinitions {
     //Escenario: @FailedLogin
     @When("the actor attempts to login with incorrect credentials")
     public void theActorAttemptsToLoginWithIncorrectCredentials() {
-        // Task for failed login
+        String invalidUser = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("credentials.invalid.user");
+        String invalidPassword = EnvironmentSpecificConfiguration.from(environmentVariables)
+                .getProperty("credentials.invalid.password");
+
+        OnStage.theActorInTheSpotlight().attemptsTo(
+                Login.withCredentials(invalidUser, invalidPassword)
+        );
     }
 
     @Then("they should see an informative error message")
     public void theyShouldSeeAnInformativeErrorMessage() {
-        // Question for error message
+        OnStage.theActorInTheSpotlight().should(
+                seeThat("the error message", TheErrorMessage.value(),
+                        containsString("Epic sadface"))
+        );
     }
     //---------
 
