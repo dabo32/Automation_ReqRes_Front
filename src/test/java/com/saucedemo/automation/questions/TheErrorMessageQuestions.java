@@ -5,9 +5,9 @@ import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Question;
 import net.serenitybdd.screenplay.questions.Text;
 
-public class TheErrorMessage implements Question<String> {
-    public static TheErrorMessage value() {
-        return new TheErrorMessage();
+public class TheErrorMessageQuestions implements Question<String> {
+    public static TheErrorMessageQuestions value() {
+        return new TheErrorMessageQuestions();
     }
 
     @Override

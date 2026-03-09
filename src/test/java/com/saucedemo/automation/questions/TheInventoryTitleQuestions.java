@@ -5,10 +5,10 @@ import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Question;
 import net.serenitybdd.screenplay.questions.Text;
 
-public class TheInventoryTitle implements Question<String> {
+public class TheInventoryTitleQuestions implements Question<String> {
 
-    public static TheInventoryTitle value() {
-        return new TheInventoryTitle();
+    public static TheInventoryTitleQuestions value() {
+        return new TheInventoryTitleQuestions();
     }
 
     @Override
