@@ -4,15 +4,18 @@ import net.serenitybdd.screenplay.targets.Target;
 import org.openqa.selenium.By;
 
 public class InventoryPage {
-    //Validate successful login
     public static final Target TITLE_SPAN = Target.the("inventory title")
             .located(By.xpath("//span[@class='title']"));
 
-    //Button to add a specific product
-    public static final Target ADD_TO_CART_BACKPACK = Target.the("add backpack to cart button")
-            .located(By.id("add-to-cart-sauce-labs-backpack"));
+    public static final Target BTN_PRODUCTO = Target.the("add to cart button for {0}")
+            .locatedBy("//div[@class='inventory_item_description' and .//div[text()='{0}']]//button");
 
-    //Shopping cart icon
-    public static final Target CART_BADGE = Target.the("shopping cart badge")
+    public static final Target PRODUCT_NAME_IN_CART = Target.the("product name in cart {0}")
+            .locatedBy("//div[@class='cart_item']//div[@class='inventory_item_name' and text()='{0}']");
+
+    public static final Target CART_ICON = Target.the("shopping cart icon")
+            .located(By.className("shopping_cart_link"));
+
+    public static final Target CART_BADGE = Target.the("shopping_cart_badge")
             .located(By.className("shopping_cart_badge"));
 }
