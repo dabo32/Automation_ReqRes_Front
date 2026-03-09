@@ -21,6 +21,7 @@ Feature: SauceDemo Shopping Workflow
   Scenario: Add a single product to the cart
     When the actor adds the "Sauce Labs Backpack" to the cart
     Then the cart icon should display "1" added product
+    And the product name in the cart should be valid
 
   @CompletePurchase
   Scenario: Complete a purchase with one product in the cart
