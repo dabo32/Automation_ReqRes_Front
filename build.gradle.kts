@@ -38,9 +38,22 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
-    systemProperty("file.encoding", "UTF-8")
+    systemProperty("serenity.outputDirectory", "target/site/serenity")
+    systemProperty("cucumber.filter.tags", System.getProperty("cucumber.filter.tags"))
+    systemProperty("cucumber.plugin", "io.cucumber.core.plugin.SerenityReporterParallel,pretty")
+
+    filter {
+        includeTestsMatching("*Runner")
+    }
+
+    testLogging {
+        showStandardStreams = true
+        events("passed", "skipped", "failed")
+    }
 }
 
 serenity {
+    testRoot = "com.saucedemo.automation"
+    requirementsBaseDir = "src/test/resources/features"
     reports = listOf("html")
 }
