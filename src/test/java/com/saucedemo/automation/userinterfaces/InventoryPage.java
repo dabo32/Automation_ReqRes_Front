@@ -18,4 +18,7 @@ public class InventoryPage {
 
     public static final Target CART_BADGE = Target.the("shopping_cart_badge")
             .located(By.className("shopping_cart_badge"));
+    //Btn Remove Cart
+    public static final Target BTN_REMOVE_DYNAMIC = Target.the("remove button for {0}")
+            .locatedBy("#remove-{0}");
 }

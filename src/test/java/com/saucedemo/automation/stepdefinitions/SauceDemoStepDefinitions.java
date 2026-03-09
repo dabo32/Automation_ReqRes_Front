@@ -25,7 +25,6 @@ import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.List;
 
-import static com.saucedemo.automation.userinterfaces.CheckoutPage.BTN_FINISH;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
@@ -88,7 +87,7 @@ public class SauceDemoStepDefinitions {
     //Escenario: @AddProduct
     @When("the actor adds the {string} to the cart")
     public void theActorAddsTheToTheCart(String productName) {
-        // El actor guarda el nombre en su memoria técnica
+        //The actor 'save' the producName
         theActorInTheSpotlight().remember("selectedProduct", productName);
 
         theActorInTheSpotlight().attemptsTo(
@@ -101,7 +100,7 @@ public class SauceDemoStepDefinitions {
     //Validate number's feature
     public void validateCartBadge(String expectedCount) {
         theActorInTheSpotlight().should(
-                seeThat("el contador del carrito",
+                seeThat("the cart counter",
                         CartQuestions.currentlyDisplayed(),
                         equalTo(expectedCount))
         );
@@ -134,7 +133,6 @@ public class SauceDemoStepDefinitions {
         theActorInTheSpotlight().attemptsTo(
                 Login.asStandardUser(environmentVariables),
                 AddToCart.theProduct("Sauce Labs Backpack"),
-                // IMPORTANTE: Navegar al formulario antes del siguiente paso
                 Click.on(InventoryPage.CART_ICON),
                 Click.on(Target.the("checkout button").locatedBy("#checkout"))
         );
@@ -164,8 +162,8 @@ public class SauceDemoStepDefinitions {
     public void confirmAndValidate(String expectedMessage) {
         //Validate checkout message
         theActorInTheSpotlight().attemptsTo(
-                Scroll.to(BTN_FINISH),
-                Click.on(BTN_FINISH)
+                Scroll.to(CheckoutPage.BTN_FINISH),
+                Click.on(CheckoutPage.BTN_FINISH)
         );
         //See success message
         theActorInTheSpotlight().should(
@@ -179,23 +177,50 @@ public class SauceDemoStepDefinitions {
     //Escenario: @MultipleProductsWorkflow
     @When("the actor adds the following products to the cart:")
     public void theActorAddsTheFollowingProductsToTheCart(List<String> products) {
-        // Task using the Data Table list
+        //secure login
+        theActorInTheSpotlight().attemptsTo(
+                Login.asStandardUser(environmentVariables)
+        );
+
+        //iteration data table
+        products.forEach(productName ->
+                theActorInTheSpotlight().attemptsTo(AddToCart.theProduct(productName))
+        );
     }
 
     @When("they remove {string} from the cart")
     public void theyRemoveFromTheCart(String productName) {
-        // Task to remove item
+        //Format and eliminate the product
+        String formattedName = productName.toLowerCase().replace(" ", "-");
+
+        theActorInTheSpotlight().attemptsTo(
+                Click.on(InventoryPage.CART_ICON),
+
+                WaitUntil.the(InventoryPage.BTN_REMOVE_DYNAMIC.of(formattedName), isVisible())
+                        .forNoMoreThan(5).seconds(),
+
+                Click.on(InventoryPage.BTN_REMOVE_DYNAMIC.of(formattedName))
+        );
     }
 
     @When("they finish the checkout process")
     public void theyFinishTheCheckoutProcess() {
-        // Task to finalize
+        theActorInTheSpotlight().attemptsTo(
+                Click.on(Target.the("checkout button").locatedBy("#checkout")),
+
+                CompletePurchase.withDetails("David", "Santiago", "110111"),
+
+                Scroll.to(CheckoutPage.BTN_FINISH),
+                Click.on(CheckoutPage.BTN_FINISH)
+        );
     }
 
     @Then("the order should be processed successfully")
     public void theOrderShouldBeProcessedSuccessfully() {
-        // Final validation
+        theActorInTheSpotlight().should(
+                seeThat("Order success message",
+                        CheckoutQuestions.successMessage(),
+                        equalTo("Thank you for your order!"))
+        );
     }
 }
-
-//---------
