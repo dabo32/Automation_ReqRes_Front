@@ -1,10 +1,13 @@
 package com.saucedemo.automation.stepdefinitions;
 
 import com.saucedemo.automation.questions.CartQuestions;
-import com.saucedemo.automation.questions.TheErrorMessage;
-import com.saucedemo.automation.questions.TheInventoryTitle;
+import com.saucedemo.automation.questions.CheckoutQuestions;
+import com.saucedemo.automation.questions.TheErrorMessageQuestions;
+import com.saucedemo.automation.questions.TheInventoryTitleQuestions;
 import com.saucedemo.automation.tasks.AddToCart;
+import com.saucedemo.automation.tasks.CompletePurchase;
 import com.saucedemo.automation.tasks.Login;
+import com.saucedemo.automation.userinterfaces.CheckoutPage;
 import com.saucedemo.automation.userinterfaces.InventoryPage;
 import io.cucumber.java.Before;
 import io.cucumber.java.en.And;
@@ -13,13 +16,16 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actions.Open;
+import net.serenitybdd.screenplay.actions.Scroll;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
+import net.serenitybdd.screenplay.targets.Target;
 import net.serenitybdd.screenplay.waits.WaitUntil;
 import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.List;
 
+import static com.saucedemo.automation.userinterfaces.CheckoutPage.BTN_FINISH;
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
 import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
 import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
@@ -57,7 +63,7 @@ public class SauceDemoStepDefinitions {
     public void theyShouldBeRedirectedToTheProductCatalog() {
         //Question to validate title 'Products'
         theActorInTheSpotlight().should(
-                seeThat("the inventory title", TheInventoryTitle.value(), equalTo("Products"))
+                seeThat("the inventory title", TheInventoryTitleQuestions.value(), equalTo("Products"))
         );
     }
     //---------
@@ -73,7 +79,7 @@ public class SauceDemoStepDefinitions {
     @Then("they should see an informative error message")
     public void theyShouldSeeAnInformativeErrorMessage() {
         theActorInTheSpotlight().should(
-                seeThat("the error message", TheErrorMessage.value(),
+                seeThat("the error message", TheErrorMessageQuestions.value(),
                         containsString("Epic sadface"))
         );
     }
@@ -125,17 +131,48 @@ public class SauceDemoStepDefinitions {
     //Escenario: @CompletePurchase
     @Given("the actor has added a product to the cart")
     public void theActorHasAddedAProductToTheCart() {
-        // Pre-condition task
+        theActorInTheSpotlight().attemptsTo(
+                Login.asStandardUser(environmentVariables),
+                AddToCart.theProduct("Sauce Labs Backpack"),
+                // IMPORTANTE: Navegar al formulario antes del siguiente paso
+                Click.on(InventoryPage.CART_ICON),
+                Click.on(Target.the("checkout button").locatedBy("#checkout"))
+        );
     }
 
     @When("they complete the checkout process with their personal details")
-    public void theyCompleteTheCheckoutProcessWithTheirPersonalDetails() {
-        // Task for checkout flow
+    public void finishPurchase() {
+        theActorInTheSpotlight().attemptsTo(
+                CompletePurchase.withDetails("David", "Santiago", "110111")
+        );
     }
 
-    @Then("they should see the confirmation message {string}")
-    public void theyShouldSeeTheConfirmationMessage(String expectedMessage) {
-        // Question for success message
+    @Then("they should see the summary with payment and total price")
+    public void validateSummary() {
+        theActorInTheSpotlight().attemptsTo(
+                WaitUntil.the(CheckoutPage.SUMMARY_TITLE, isVisible()).forNoMoreThan(10).seconds()
+        );
+
+        theActorInTheSpotlight().should(
+                seeThat("Payment info", CheckoutQuestions.paymentInfo(), containsString("SauceCard")),
+                seeThat("Shipping information", CheckoutQuestions.shippingInfo(), containsString("Pony Express")),
+                seeThat("Total price", CheckoutQuestions.totalPrice(), containsString("$"))
+        );
+    }
+
+    @And("they confirm the purchase to see the message {string}")
+    public void confirmAndValidate(String expectedMessage) {
+        //Validate checkout message
+        theActorInTheSpotlight().attemptsTo(
+                Scroll.to(BTN_FINISH),
+                Click.on(BTN_FINISH)
+        );
+        //See success message
+        theActorInTheSpotlight().should(
+                seeThat("Success message",
+                        CheckoutQuestions.successMessage(),
+                        equalTo(expectedMessage))
+        );
     }
     //---------
 
@@ -159,5 +196,6 @@ public class SauceDemoStepDefinitions {
     public void theOrderShouldBeProcessedSuccessfully() {
         // Final validation
     }
-    //---------
 }
+
+//---------
