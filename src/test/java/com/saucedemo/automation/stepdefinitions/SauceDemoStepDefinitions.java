@@ -1,21 +1,28 @@
 package com.saucedemo.automation.stepdefinitions;
 
+import com.saucedemo.automation.questions.CartQuestions;
 import com.saucedemo.automation.questions.TheErrorMessage;
 import com.saucedemo.automation.questions.TheInventoryTitle;
+import com.saucedemo.automation.tasks.AddToCart;
 import com.saucedemo.automation.tasks.Login;
+import com.saucedemo.automation.userinterfaces.InventoryPage;
 import io.cucumber.java.Before;
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-import net.serenitybdd.model.environment.EnvironmentSpecificConfiguration;
+import net.serenitybdd.screenplay.actions.Click;
 import net.serenitybdd.screenplay.actions.Open;
 import net.serenitybdd.screenplay.actors.OnStage;
 import net.serenitybdd.screenplay.actors.OnlineCast;
+import net.serenitybdd.screenplay.waits.WaitUntil;
 import net.thucydides.model.util.EnvironmentVariables;
 
 import java.util.List;
 
 import static net.serenitybdd.screenplay.GivenWhenThen.seeThat;
+import static net.serenitybdd.screenplay.actors.OnStage.theActorInTheSpotlight;
+import static net.serenitybdd.screenplay.matchers.WebElementStateMatchers.isVisible;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -32,7 +39,7 @@ public class SauceDemoStepDefinitions {
     @Given("the actor is on the login page")
     public void theActorIsOnTheLoginPage() {
         OnStage.theActorCalled("David"); //Main actor
-        OnStage.theActorInTheSpotlight().wasAbleTo(
+        theActorInTheSpotlight().wasAbleTo(
                 Open.browserOn().thePageNamed("pages.saucedemo")
         );
     }
@@ -40,20 +47,16 @@ public class SauceDemoStepDefinitions {
     //Escenario: @SuccessfulLogin
     @When("the actor enters valid credentials")
     public void theActorEntersValidCredentials() {
-        String user = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("credentials.standard.user");
-        String password = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("credentials.standard.password");
-
-        OnStage.theActorInTheSpotlight().attemptsTo(
-                Login.withCredentials(user, password)
+        //private method to login
+        theActorInTheSpotlight().attemptsTo(
+                Login.asStandardUser(environmentVariables)
         );
     }
 
     @Then("they should be redirected to the product catalog")
     public void theyShouldBeRedirectedToTheProductCatalog() {
         //Question to validate title 'Products'
-        OnStage.theActorInTheSpotlight().should(
+        theActorInTheSpotlight().should(
                 seeThat("the inventory title", TheInventoryTitle.value(), equalTo("Products"))
         );
     }
@@ -62,19 +65,14 @@ public class SauceDemoStepDefinitions {
     //Escenario: @FailedLogin
     @When("the actor attempts to login with incorrect credentials")
     public void theActorAttemptsToLoginWithIncorrectCredentials() {
-        String invalidUser = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("credentials.invalid.user");
-        String invalidPassword = EnvironmentSpecificConfiguration.from(environmentVariables)
-                .getProperty("credentials.invalid.password");
-
-        OnStage.theActorInTheSpotlight().attemptsTo(
-                Login.withCredentials(invalidUser, invalidPassword)
+        theActorInTheSpotlight().attemptsTo(
+                Login.withInvalidCredentials(environmentVariables)
         );
     }
 
     @Then("they should see an informative error message")
     public void theyShouldSeeAnInformativeErrorMessage() {
-        OnStage.theActorInTheSpotlight().should(
+        theActorInTheSpotlight().should(
                 seeThat("the error message", TheErrorMessage.value(),
                         containsString("Epic sadface"))
         );
@@ -84,14 +82,45 @@ public class SauceDemoStepDefinitions {
     //Escenario: @AddProduct
     @When("the actor adds the {string} to the cart")
     public void theActorAddsTheToTheCart(String productName) {
-        // Task to add a specific product
+        // El actor guarda el nombre en su memoria técnica
+        theActorInTheSpotlight().remember("selectedProduct", productName);
+
+        theActorInTheSpotlight().attemptsTo(
+                Login.asStandardUser(environmentVariables),
+                AddToCart.theProduct(productName)
+        );
     }
 
     @Then("the cart icon should display {string} added product")
-    public void theCartIconShouldDisplayAddedProduct(String count) {
-        // Question for cart count
+    //Validate number's feature
+    public void validateCartBadge(String expectedCount) {
+        theActorInTheSpotlight().should(
+                seeThat("el contador del carrito",
+                        CartQuestions.currentlyDisplayed(),
+                        equalTo(expectedCount))
+        );
+    }
+
+    @And("the product name in the cart should be valid")
+    public void validateProductName() {
+        //The actor remember the product's name
+        String productName = theActorInTheSpotlight().recall("selectedProduct");
+
+        //Enter to shopping cart
+        theActorInTheSpotlight().attemptsTo(
+                Click.on(InventoryPage.CART_ICON),
+                WaitUntil.the(InventoryPage.PRODUCT_NAME_IN_CART.of(productName), isVisible())
+        );
+
+        //Validate product
+        theActorInTheSpotlight().should(
+                seeThat("Products in the cart: ",
+                        CartQuestions.productNameDisplayed(productName),
+                        equalTo(productName))
+        );
     }
     //---------
+
 
     //Escenario: @CompletePurchase
     @Given("the actor has added a product to the cart")
