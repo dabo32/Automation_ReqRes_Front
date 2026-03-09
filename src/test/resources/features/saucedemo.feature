@@ -27,7 +27,8 @@ Feature: SauceDemo Shopping Workflow
   Scenario: Complete a purchase with one product in the cart
     Given the actor has added a product to the cart
     When they complete the checkout process with their personal details
-    Then they should see the confirmation message "Thank you for your order!"
+    Then they should see the summary with payment and total price
+    And they confirm the purchase to see the message "Thank you for your order!"
 
   @MultipleProductsWorkflow
   Scenario: Manage multiple products, remove one, and complete purchase
